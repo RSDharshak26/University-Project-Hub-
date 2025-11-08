@@ -1,0 +1,40 @@
+
+
+1) file structure
+
+router = map between URL → component.
+
+old way of routing pages router. each file in /pages becomes a route
+new way of routing is app/. this uses react server componenets, laoyouts and nested routes. 
+
+/app    
+    - page.tsx          // /
+    /about
+        -page.tsx       // /about
+    /blog/[id]
+        -page.tsx       // /blog./:id
+
+
+/auth                   // this is also convention
+
+
+
+
+2) prism ORM 
+
+
+
+
+also typescript ? 
+
+
+
+
+3) layout.tsx
+        children placeholder is injected with the respective page.tsx
+
+
+
+
+4) REST API : Representational State Transfer
+use normal web methods (like GET, POST, PUT, DELETE) to exchange JSON data.

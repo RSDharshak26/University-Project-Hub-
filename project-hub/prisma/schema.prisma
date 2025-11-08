@@ -1,0 +1,108 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String         @unique
+  password      String?
+  role          Role           @default(STUDENT)
+  projects      Project[]      @relation("UserProjects")
+  comments      Comment[]      @relation("UserComments")
+  interests     Interest[]     @relation("UserInterests")
+  notifications Notification[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Project {
+  id          String         @id @default(cuid())
+  title       String
+  description String
+  status      ProjectStatus
+  visibility  Visibility
+  techStack   String[]
+  teamSlots   Int
+  owner       User           @relation("UserProjects", fields: [ownerId], references: [id])
+  ownerId     String
+  comments    Comment[]
+  interests   Interest[]
+  images      String[]
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  content   String
+  author    User      @relation("UserComments", fields: [authorId], references: [id])
+  authorId  String
+  project   Project   @relation(fields: [projectId], references: [id])
+  projectId String
+  parentId  String?
+  // Self-relation for nested replies
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Interest {
+  id        String         @id @default(cuid())
+  user      User           @relation("UserInterests", fields: [userId], references: [id])
+  userId    String
+  project   Project        @relation(fields: [projectId], references: [id])
+  projectId String
+  status    InterestStatus @default(PENDING)
+  createdAt DateTime       @default(now())
+
+  @@unique([userId, projectId])
+}
+
+model Notification {
+  id        String            @id @default(cuid())
+  user      User              @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  type      NotificationType
+  isRead    Boolean           @default(false)
+  createdAt DateTime          @default(now())
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum ProjectStatus {
+  IDEATION
+  IN_PROGRESS
+  COMPLETED
+  SEEKING_TEAM
+}
+
+enum Visibility {
+  PUBLIC
+  DRAFT
+}
+
+enum InterestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum NotificationType {
+  INTEREST
+  COMMENT_REPLY
+  MENTION
+  ADMIN_ACTION
+}
+
+
