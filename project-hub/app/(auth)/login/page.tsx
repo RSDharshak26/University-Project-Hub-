@@ -1,10 +1,12 @@
 "use client"
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const callbackUrl = searchParams?.get('callbackUrl') ?? '/dashboard'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,7 +19,7 @@ export default function LoginPage() {
     const res = await signIn('credentials', { redirect: false, email, password })
     setLoading(false)
     if (res?.error) setError(res.error)
-    else router.push('/projects')
+    else router.push(callbackUrl)
   }
 
   return (
@@ -30,7 +32,7 @@ export default function LoginPage() {
         <button disabled={loading} className="w-full bg-black text-white py-2 rounded">{loading ? 'Signing in...' : 'Sign in'}</button>
       </form>
       <div className="mt-4">
-        <button onClick={() => signIn('azure-ad', { callbackUrl: '/projects' })} className="w-full border py-2 rounded">Sign in with Microsoft</button>
+        <button onClick={() => signIn('azure-ad', { callbackUrl, prompt: 'select_account' })} className="w-full border py-2 rounded">Sign in with Microsoft</button>
       </div>
     </div>
   )
