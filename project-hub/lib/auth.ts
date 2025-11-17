@@ -1,10 +1,12 @@
 import NextAuth, { getServerSession, type AuthOptions } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import AzureAd from 'next-auth/providers/azure-ad'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import { prisma } from './prisma'
 import bcrypt from 'bcrypt'
 
 export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
     Credentials({
       name: 'Credentials',
@@ -38,6 +40,27 @@ export const authOptions: AuthOptions = {
   ],
   session: { strategy: 'jwt' },
   callbacks: {
+    async signIn({ user, account, profile }: any) {
+      try {
+        // When signing in via Azure AD, ensure a corresponding Prisma user exists
+        // Use upsert so existing users keep their role and data is not overwritten.
+        if (account?.provider === 'azure-ad' && user?.email) {
+          await prisma.user.upsert({
+            where: { email: user.email },
+            update: { name: user.name ?? undefined },
+            create: {
+              email: user.email,
+              name: user.name ?? undefined,
+              role: 'STUDENT',
+            },
+          })
+        }
+      } catch (err) {
+        console.error('signIn upsert error', err)
+        // allow sign in to proceed; NextAuth will handle errors separately
+      }
+      return true
+    },
     async jwt({ token, user }: any) {
       if (user) {
         token.role = (user as any).role ?? token.role ?? 'STUDENT'

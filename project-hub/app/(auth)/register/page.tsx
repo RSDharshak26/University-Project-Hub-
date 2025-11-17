@@ -17,7 +17,7 @@ export default function RegisterPage() {
       return
     }
     setLoading(true)
-    const res = await fetch('/api/users', { method: 'POST', body: JSON.stringify(parsed.data) })
+    const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(parsed.data) })
     setLoading(false)
     if (!res.ok) setMessage('Registration failed')
     else setMessage('Registered, you can now log in')

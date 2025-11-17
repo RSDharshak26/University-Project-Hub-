@@ -17,7 +17,7 @@ export default function LoginPage() {
     const res = await signIn('credentials', { redirect: false, email, password })
     setLoading(false)
     if (res?.error) setError(res.error)
-    else router.push('/dashboard/student')
+    else router.push('/projects')
   }
 
   return (
@@ -30,7 +30,7 @@ export default function LoginPage() {
         <button disabled={loading} className="w-full bg-black text-white py-2 rounded">{loading ? 'Signing in...' : 'Sign in'}</button>
       </form>
       <div className="mt-4">
-        <button onClick={() => signIn('azure-ad')} className="w-full border py-2 rounded">Sign in with Microsoft</button>
+        <button onClick={() => signIn('azure-ad', { callbackUrl: '/projects' })} className="w-full border py-2 rounded">Sign in with Microsoft</button>
       </div>
     </div>
   )
